@@ -1,37 +1,46 @@
 {
   "name": "tailwindcss-clip-path-utils",
   "version": "1.0.0",
-  "description": "Tailwind CSS plugin providing clip-path utilities for circles, ellipses, polygons, and insets. Supports Tailwind CSS v3 & v4.",
+  "description": "Tailwind CSS plugin providing intuitive clip-path utilities for circles, ellipses, polygons, and insets. Supports Tailwind CSS v3 & v4.",
+  "main": "index.js",
+  "bin": {
+    "clip-path-generator": "./server.js"
+  },
+  "scripts": {
+    "dev": "node server.js",
+    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css",
+    "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch"
+  },
   "keywords": [
     "tailwindcss",
     "tailwind",
     "tailwind-plugin",
     "clip-path",
     "clippath",
+    "clip-path-utils",
     "polygon",
     "circle",
     "ellipse",
     "inset",
-    "css",
-    "utilities"
+    "shape",
+    "css"
   ],
   "homepage": "https://github.com/SnehMoradia/tailwindcss-clip-path-utils#readme",
-  "bugs": {
-    "url": "https://github.com/SnehMoradia/tailwindcss-clip-path-utils/issues"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SnehMoradia/tailwindcss-clip-path-utils.git"
   },
-  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SnehMoradia/tailwindcss-clip-path-utils/issues"
+  },
   "author": {
     "name": "Sneh Moradia",
     "url": "https://github.com/SnehMoradia"
   },
-  "type": "commonjs",
-  "main": "index.js",
+  "license": "MIT",
   "files": [
     "index.js",
+    "server.js",
     "README.md",
     "LICENSE"
   ],
@@ -40,5 +49,9 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.2",
+    "tailwindcss": "^4.3.2"
   }
 }
