@@ -31,6 +31,12 @@ module.exports = ({ matchUtilities }) => {
     {
       "clip-path-eli": (value) => {
         const valStr = String(value);
+        if (valStr.includes("-at-")) {
+          const parts = valStr.split("-at-");
+          const dims = parts[0].split(/[-_]/);
+          const coords = parts[1].split(/[-_]/).map(c => `${c}%`).join(" ");
+          return { clipPath: `ellipse(${dims[0]}% ${dims[1]}% at ${coords})` };
+        }
         if (valStr.includes(" ") || valStr.includes("%")) {
           return { clipPath: `ellipse(${valStr})` };
         }
@@ -99,6 +105,7 @@ module.exports = ({ matchUtilities }) => {
     {
       values: {
         "50-0-100-100-0-100": "50-0-100-100-0-100",
+        "20-0-0-20-30-50-0-80-20-100-50-70-80-100-100-80-70-50-100-20-80-0-50-30": "20-0-0-20-30-50-0-80-20-100-50-70-80-100-100-80-70-50-100-20-80-0-50-30",
       },
     }
   );

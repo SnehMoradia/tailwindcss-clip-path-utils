@@ -1,3 +1,221 @@
 @import "tailwindcss";
 
 @plugin '../index.js';
+
+/* Default Dark Theme variables */
+    body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #0b0f19;
+    background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1px, transparent 0);
+    background-size: 24px 24px;
+    color: #e2e8f0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Light Theme override */
+    body.light-theme {
+    background-color: #f8fafc;
+    background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 0);
+    color: #0f172a;
+    }
+
+    .mono-font {
+    font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Checkered Canvas Grid Backgrounds */
+    .checkered-grid {
+    background-image: 
+        linear-gradient(45deg, #161c2d 25%, transparent 25%), 
+        linear-gradient(-45deg, #161c2d 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #161c2d 75%), 
+        linear-gradient(-45deg, transparent 75%, #161c2d 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    transition: background-image 0.3s ease;
+    }
+    body.light-theme .checkered-grid {
+    background-image: 
+        linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+    }
+
+    /* Glass Panel styling */
+    .glass-panel {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    body.light-theme .glass-panel {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 30px 0 rgba(99, 102, 241, 0.04);
+    }
+
+    /* Text gradient styling */
+    .text-title {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: linear-gradient(to right, #e2e8f0, #c084fc);
+    transition: background-image 0.3s ease;
+    }
+    body.light-theme .text-title {
+    background-image: linear-gradient(to right, #1e1b4b, #6366f1);
+    }
+
+    .text-body-primary {
+    color: #e2e8f0;
+    transition: color 0.3s ease;
+    }
+    body.light-theme .text-body-primary {
+    color: #1e293b;
+    }
+
+    .text-body-secondary {
+    color: #94a3b8;
+    transition: color 0.3s ease;
+    }
+    body.light-theme .text-body-secondary {
+    color: #64748b;
+    }
+
+    /* Code block container styling */
+    .code-container {
+    background-color: #070b13;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    body.light-theme .code-container {
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    }
+
+    body.light-theme code#code-tailwind {
+    color: #4f46e5;
+    }
+    body.light-theme code#code-css {
+    color: #334155;
+    }
+
+    /* Node coordinate inputs styling */
+    .input-row {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    body.light-theme .input-row {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    }
+
+    .input-box {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    body.light-theme .input-box {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    }
+
+    body.light-theme .input-box input {
+    color: #4f46e5;
+    }
+
+    input[type="number"] {
+    color: #e2e8f0 !important;
+    }
+
+    body.light-theme input[type="number"] {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #4f46e5 !important;
+    }
+
+    /* Slider rows styling */
+    .slider-row {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    body.light-theme .slider-row {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    }
+
+    body.light-theme .slider-row input[type="range"] {
+    background-color: #e2e8f0;
+    }
+
+    /* Preset Button styling */
+    .btn-preset {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+    body.light-theme .btn-preset {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    }
+    body.light-theme .btn-preset:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    }
+
+    /* Header & Footer transitions */
+    header {
+    background-color: rgba(11, 15, 25, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+    }
+    body.light-theme header {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid #cbd5e1;
+    }
+
+    body.light-theme #drop-zone {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    }
+    body.light-theme #drop-zone:hover {
+    border-color: #6366f1;
+    }
+
+    body.light-theme .sidebar-tab-header {
+    background-color: rgba(15, 23, 42, 0.05);
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+    }
+
+    footer {
+    background-color: #080b13;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease, border-top-color 0.3s ease;
+    }
+    body.light-theme footer {
+    background-color: #ffffff;
+    border-top: 1px solid #cbd5e1;
+    color: #64748b;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+    width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+    }
