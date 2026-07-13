@@ -789,7 +789,8 @@ function loadExtractorImageFromUrl(url) {
     alert("CORS or Load Error: Could not load the image from the URL. Make sure the URL is valid, direct to an image, and supports CORS (Cross-Origin Resource Sharing). If it fails, please download the image to your computer and drag it in!");
   };
   
-  if (url.startsWith('data:')) {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (url.startsWith('data:') || !isLocal) {
     img.src = url;
   } else {
     img.src = `/proxy?url=${encodeURIComponent(url)}`;
