@@ -651,6 +651,11 @@ dropZone.addEventListener('drop', (e) => {
   dropZone.classList.remove('border-indigo-500/80', 'bg-indigo-500/5');
   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
     loadExtractorImage(e.dataTransfer.files[0]);
+  } else {
+    const url = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text/uri-list');
+    if (url && (url.startsWith('http') || url.startsWith('data:'))) {
+      loadExtractorImageFromUrl(url);
+    }
   }
 });
 fileInput.addEventListener('change', (e) => {
@@ -714,10 +719,41 @@ function loadExtractorImage(file) {
       
       // Trigger change event to set correct initial visibility for threshold slider
       detectionModeSelect.dispatchEvent(new Event('change'));
+      
+      // Auto-extract immediately!
+      processExtractedImage();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function loadExtractorUrl() {
+  const urlInput = document.getElementById('input-extractor-url');
+  const url = urlInput.value.trim();
+  if (!url) return;
+
+  loadExtractorImageFromUrl(url);
+}
+
+function loadExtractorImageFromUrl(url) {
+  customCentroid = null;
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    originalExtractorImage = img;
+    extractorControls.classList.remove('hidden');
+    
+    // Trigger change event to set correct initial visibility for threshold slider
+    detectionModeSelect.dispatchEvent(new Event('change'));
+    
+    // Auto-extract immediately!
+    processExtractedImage();
+  };
+  img.onerror = () => {
+    alert("CORS or Load Error: Could not load the image from the URL. Make sure the URL is valid, direct to an image, and supports CORS (Cross-Origin Resource Sharing). If it fails, please download the image to your computer and drag it in!");
+  };
+  img.src = url;
 }
 
 function processExtractedImage() {
