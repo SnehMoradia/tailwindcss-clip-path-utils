@@ -50,15 +50,31 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  const url = `http://localhost:${PORT}`;
-  console.log(`🚀 Web Server is running at: ${url}`);
-  console.log("Press Ctrl+C to stop the server and the compiler.");
-  
-  // Auto-open browser
-  const startCmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-  exec(`${startCmd} ${url}`);
+let currentPort = PORT;
+
+function startServer(port) {
+  server.listen(port, () => {
+    const url = `http://localhost:${port}`;
+    console.log(`🚀 Web Server is running at: ${url}`);
+    console.log("Press Ctrl+C to stop the server and the compiler.");
+    
+    // Auto-open browser
+    const startCmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+    exec(`${startCmd} ${url}`);
+  });
+}
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`⚠️ Port ${currentPort} is in use. Trying port ${currentPort + 1}...`);
+    currentPort++;
+    startServer(currentPort);
+  } else {
+    console.error(err);
+  }
 });
+
+startServer(currentPort);
 
 // Ensure Tailwind child process is cleaned up when server exits
 process.on('SIGINT', () => {

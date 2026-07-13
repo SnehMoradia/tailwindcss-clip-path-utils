@@ -42,6 +42,7 @@
     "index.js",
     "server.js",
     "README.md",
+    "src",
     "LICENSE"
   ],
   "peerDependencies": {
