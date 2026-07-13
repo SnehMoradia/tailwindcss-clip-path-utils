@@ -21,8 +21,8 @@ const MIME_TYPES = {
 
 // Spawn Tailwind Compiler in watch mode
 console.log("⏳ Starting Tailwind CSS watch compiler...");
-const inputCss = path.join(__dirname, 'src', 'input.css');
-const outputCss = path.join(__dirname, 'src', 'output.css');
+const inputCss = `"${path.join(__dirname, 'src', 'input.css')}"`;
+const outputCss = `"${path.join(__dirname, 'src', 'output.css')}"`;
 const tailwind = spawn('npx', ['@tailwindcss/cli', '-i', inputCss, '-o', outputCss, '--watch'], {
   shell: true,
   stdio: 'inherit'
