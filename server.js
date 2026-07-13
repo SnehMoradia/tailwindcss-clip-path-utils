@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { exec, spawn } = require('child_process');
@@ -27,8 +28,33 @@ const tailwind = spawn('npx', ['@tailwindcss/cli', '-i', inputCss, '-o', outputC
   shell: true,
   stdio: 'inherit'
 });
-
 const server = http.createServer((req, res) => {
+  const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
+  const pathname = parsedUrl.pathname;
+
+  if (pathname === '/proxy') {
+    const targetUrl = parsedUrl.searchParams.get('url');
+    if (!targetUrl) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Missing url parameter');
+      return;
+    }
+
+    const clientModule = targetUrl.startsWith('https') ? https : http;
+    clientModule.get(targetUrl, (proxyRes) => {
+      const contentType = proxyRes.headers['content-type'];
+      res.writeHead(200, {
+        'Content-Type': contentType || 'image/jpeg',
+        'Access-Control-Allow-Origin': '*'
+      });
+      proxyRes.pipe(res);
+    }).on('error', (e) => {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end(`Proxy error: ${e.message}`);
+    });
+    return;
+  }
+
   const decodedUrl = decodeURIComponent(req.url);
   let filePath = path.join(PUBLIC_DIR, decodedUrl === '/' ? 'index.html' : decodedUrl);
   

@@ -256,8 +256,20 @@ function renderPolygon() {
 
   // 4. Update code blocks
   const classCoords = points.map(p => `${p.x}-${p.y}`).join('-');
-  // Display clean bracketless Tailwind class
-  let tailwindClass = `clip-path-pol-${classCoords}`;
+  const predefinedPolygons = [
+    "50-0-100-100-0-100",
+    "20-0-80-0-100-100-0-100",
+    "25-0-100-0-75-100-0-100",
+    "50-0-100-38-82-100-18-100-0-38",
+    "50-0-100-25-100-75-50-100-0-75-0-25",
+    "50-0-61-35-98-35-68-57-79-91-50-70-21-91-32-57-2-35-39-35",
+    "0-30-60-30-60-0-100-50-60-100-60-70-0-70",
+    "35-0-65-0-65-35-100-35-100-65-65-65-65-100-35-100-35-65-0-65-0-35-35-35",
+    "20-0-0-20-30-50-0-80-20-100-50-70-80-100-100-80-70-50-100-20-80-0-50-30"
+  ];
+  let tailwindClass = predefinedPolygons.includes(classCoords)
+    ? `clip-path-pol-${classCoords}`
+    : `clip-path-pol-[${classCoords}]`;
   
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
@@ -318,8 +330,16 @@ function renderCircle() {
   }));
 
   // 5. Update code blocks
-  // Display clean bracketless Tailwind class
-  let tailwindClass = `clip-path-cir-${circleState.r}-at-${circleState.cx}-${circleState.cy}`;
+  const classVal = `${circleState.r}-at-${circleState.cx}-${circleState.cy}`;
+  const predefinedCircles = [
+    "40-at-50-50",
+    "50-at-50-50",
+    "40-at-0-0",
+    "30-at-30-70"
+  ];
+  let tailwindClass = predefinedCircles.includes(classVal)
+    ? `clip-path-cir-${classVal}`
+    : `clip-path-cir-[${classVal}]`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
@@ -386,8 +406,16 @@ function renderEllipse() {
   }));
 
   // 5. Update code blocks
-  // Display clean bracketless Tailwind class
-  let tailwindClass = `clip-path-eli-${ellipseState.rx}-${ellipseState.ry}-at-${ellipseState.cx}-${ellipseState.cy}`;
+  const classVal = `${ellipseState.rx}-${ellipseState.ry}-at-${ellipseState.cx}-${ellipseState.cy}`;
+  const predefinedEllipses = [
+    "40-40-at-50-50",
+    "50-30-at-50-50",
+    "25-40-at-50-50",
+    "35-20-at-40-60"
+  ];
+  let tailwindClass = predefinedEllipses.includes(classVal)
+    ? `clip-path-eli-${classVal}`
+    : `clip-path-eli-[${classVal}]`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
@@ -451,8 +479,15 @@ function renderInset() {
   }));
 
   // 5. Update code blocks
-  // Display clean bracketless Tailwind class
-  let tailwindClass = `clip-path-ins-${insetState.t}-${insetState.r}-${insetState.b}-${insetState.l}`;
+  const classVal = `${insetState.t}-${insetState.r}-${insetState.b}-${insetState.l}`;
+  const predefinedInsets = [
+    "10-10-10-10",
+    "20-5-20-5",
+    "5-20-15-10"
+  ];
+  let tailwindClass = predefinedInsets.includes(classVal)
+    ? `clip-path-ins-${classVal}`
+    : `clip-path-ins-[${classVal}]`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
@@ -753,7 +788,12 @@ function loadExtractorImageFromUrl(url) {
   img.onerror = () => {
     alert("CORS or Load Error: Could not load the image from the URL. Make sure the URL is valid, direct to an image, and supports CORS (Cross-Origin Resource Sharing). If it fails, please download the image to your computer and drag it in!");
   };
-  img.src = url;
+  
+  if (url.startsWith('data:')) {
+    img.src = url;
+  } else {
+    img.src = `/proxy?url=${encodeURIComponent(url)}`;
+  }
 }
 
 function processExtractedImage() {
