@@ -40,9 +40,7 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "server.js",
     "README.md",
-    "src",
     "LICENSE"
   ],
   "peerDependencies": {
