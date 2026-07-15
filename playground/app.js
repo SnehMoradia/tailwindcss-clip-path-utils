@@ -267,9 +267,7 @@ function renderPolygon() {
     "35-0-65-0-65-35-100-35-100-65-65-65-65-100-35-100-35-65-0-65-0-35-35-35",
     "20-0-0-20-30-50-0-80-20-100-50-70-80-100-100-80-70-50-100-20-80-0-50-30"
   ];
-  let tailwindClass = predefinedPolygons.includes(classCoords)
-    ? `clip-path-pol-${classCoords}`
-    : `clip-path-pol-[${classCoords}]`;
+  let tailwindClass = `clip-path-pol-${classCoords}`;
   
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
