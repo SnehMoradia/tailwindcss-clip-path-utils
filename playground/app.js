@@ -1126,3 +1126,15 @@ function setSidebarTab(tabName) {
     panelExtractor.classList.remove('hidden');
   }
 }
+
+// Expose all onclick-called functions to the global window scope.
+// This is required for inline HTML onclick handlers to work correctly
+// when deployed on platforms like Vercel that serve static files.
+window.toggleTheme = toggleTheme;
+window.setShapeMode = setShapeMode;
+window.setSidebarTab = setSidebarTab;
+window.copyToClipboard = copyToClipboard;
+window.addPoint = addPoint;
+window.changeBgImage = changeBgImage;
+window.loadExtractorUrl = loadExtractorUrl;
+window.applyExtractedShape = applyExtractedShape;
