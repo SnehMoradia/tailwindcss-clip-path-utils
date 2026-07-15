@@ -329,15 +329,7 @@ function renderCircle() {
 
   // 5. Update code blocks
   const classVal = `${circleState.r}-at-${circleState.cx}-${circleState.cy}`;
-  const predefinedCircles = [
-    "40-at-50-50",
-    "50-at-50-50",
-    "40-at-0-0",
-    "30-at-30-70"
-  ];
-  let tailwindClass = predefinedCircles.includes(classVal)
-    ? `clip-path-cir-${classVal}`
-    : `clip-path-cir-[${classVal}]`;
+  let tailwindClass = `clip-path-cir-${classVal}`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
@@ -405,15 +397,7 @@ function renderEllipse() {
 
   // 5. Update code blocks
   const classVal = `${ellipseState.rx}-${ellipseState.ry}-at-${ellipseState.cx}-${ellipseState.cy}`;
-  const predefinedEllipses = [
-    "40-40-at-50-50",
-    "50-30-at-50-50",
-    "25-40-at-50-50",
-    "35-20-at-40-60"
-  ];
-  let tailwindClass = predefinedEllipses.includes(classVal)
-    ? `clip-path-eli-${classVal}`
-    : `clip-path-eli-[${classVal}]`;
+  let tailwindClass = `clip-path-eli-${classVal}`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
@@ -478,14 +462,7 @@ function renderInset() {
 
   // 5. Update code blocks
   const classVal = `${insetState.t}-${insetState.r}-${insetState.b}-${insetState.l}`;
-  const predefinedInsets = [
-    "10-10-10-10",
-    "20-5-20-5",
-    "5-20-15-10"
-  ];
-  let tailwindClass = predefinedInsets.includes(classVal)
-    ? `clip-path-ins-${classVal}`
-    : `clip-path-ins-[${classVal}]`;
+  let tailwindClass = `clip-path-ins-${classVal}`;
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
