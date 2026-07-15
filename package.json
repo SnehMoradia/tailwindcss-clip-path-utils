@@ -1,6 +1,6 @@
 {
   "name": "tailwindcss-clip-path-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tailwind CSS plugin providing intuitive clip-path utilities for circles, ellipses, polygons, and insets. Supports Tailwind CSS v3 & v4.",
   "main": "index.js",
   "bin": {
@@ -40,9 +40,7 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "server.js",
     "README.md",
-    "src",
     "LICENSE"
   ],
   "peerDependencies": {
