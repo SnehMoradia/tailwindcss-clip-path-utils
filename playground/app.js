@@ -45,6 +45,7 @@ const roundedPresets = {
 // State Variables
 let mode = 'polygon';
 let theme = 'dark';
+let activePresetName = 'Triangle';
 let points = []; // Array of {x, y} coordinates (polygon)
 let circleState = { r: 40, cx: 50, cy: 50 }; // Circle properties
 let ellipseState = { rx: 40, ry: 40, cx: 50, cy: 50 }; // Ellipse properties
@@ -148,7 +149,11 @@ function setShapeMode(newMode, keepPoints = false) {
   
   if (mode === 'polygon') {
     svgPolygon.classList.remove('hidden');
-    btnAddPoint.classList.remove('hidden');
+    if (activePresetName === 'Custom Star') {
+      btnAddPoint.classList.remove('hidden');
+    } else {
+      btnAddPoint.classList.add('hidden');
+    }
     pointsTitle.textContent = "Coordinates";
     // Default to first preset
     if (!keepPoints) {
@@ -209,29 +214,38 @@ function updatePresetsGrid() {
     const btn = document.createElement('button');
     btn.textContent = name;
     btn.onclick = () => action(name);
-    btn.className = "py-2 px-3 rounded-xl btn-preset text-xs font-semibold transition-all duration-200 truncate";
+    if (activePresetName === name) {
+      btn.className = "py-2 px-3 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold transition-all duration-200 truncate cursor-pointer";
+    } else {
+      btn.className = "py-2 px-3 rounded-xl btn-preset text-xs font-semibold transition-all duration-200 truncate cursor-pointer";
+    }
     grid.appendChild(btn);
   });
 }
 
 // Load Shape Presets
 function loadPresetPoints(name) {
+  activePresetName = name;
   points = JSON.parse(JSON.stringify(polygonPresets[name]));
   updateCanvas();
 }
 function loadPresetCircle(name) {
+  activePresetName = name;
   circleState = { ...circlePresets[name] };
   updateCanvas();
 }
 function loadPresetEllipse(name) {
+  activePresetName = name;
   ellipseState = { ...ellipsePresets[name] };
   updateCanvas();
 }
 function loadPresetInset(name) {
+  activePresetName = name;
   insetState = { ...insetPresets[name] };
   updateCanvas();
 }
 function loadPresetRounded(name) {
+  activePresetName = name;
   roundedState = { ...roundedPresets[name] };
   updateCanvas();
 }
@@ -252,10 +266,19 @@ function updateCanvas() {
   } else if (mode === 'rounded') {
     renderRounded();
   }
+
+  updatePresetsGrid();
 }
 
 // POLYGON RENDERER
 function renderPolygon() {
+  const btnAddPoint = document.getElementById('btn-add-point');
+  if (activePresetName === 'Custom Star') {
+    btnAddPoint.classList.remove('hidden');
+  } else {
+    btnAddPoint.classList.add('hidden');
+  }
+
   // 1. Set SVG properties
   const svgPoints = points.map(p => `${(p.x * 384) / 100},${(p.y * 384) / 100}`).join(' ');
   svgPolygon.setAttribute('points', svgPoints);
@@ -605,18 +628,29 @@ function createHandle(x, y, label, dragCallback) {
 // Helper: Create coordinate card row in sidepanel
 function createCoordinateRow(idx, x, y, changeCallback, allowDelete) {
   const row = document.createElement('div');
-  row.className = "flex items-center gap-3 input-row p-3 rounded-xl";
-  
+  row.className = "flex items-center gap-3 input-row p-3 rounded-xl transition-all duration-150";
+
+  // Drag handle HTML if Custom Star is active
+  const isCustomStar = (mode === 'polygon' && activePresetName === 'Custom Star');
+  const dragHandleHtml = isCustomStar ? `
+    <div class="cursor-grab active:cursor-grabbing text-slate-500 hover:text-indigo-400 p-1.5 rounded transition-colors select-none drag-grip" title="Drag to reorder node">
+      <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 9h.01M8 15h.01M16 9h.01M16 15h.01M12 9h.01M12 15h.01"></path>
+      </svg>
+    </div>
+  ` : '';
+
   row.innerHTML = `
+    ${dragHandleHtml}
     <span class="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-semibold text-slate-400 select-none">${idx + 1}</span>
     <div class="flex-1 grid grid-cols-2 gap-2">
       <div class="flex items-center gap-1.5 input-box px-2.5 py-1.5 rounded-lg">
         <span class="text-[10px] text-slate-500 font-bold uppercase select-none">X</span>
-        <input type="number" min="0" max="100" value="${x}" class="bg-transparent focus:outline-none w-full text-sm text-indigo-300 font-semibold text-center select-all" />
+        <input type="number" min="0" max="100" value="${x}" class="bg-transparent focus:outline-none w-full text-sm text-indigo-300 font-semibold text-center select-all appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]" />
       </div>
       <div class="flex items-center gap-1.5 input-box px-2.5 py-1.5 rounded-lg">
         <span class="text-[10px] text-slate-500 font-bold uppercase select-none">Y</span>
-        <input type="number" min="0" max="100" value="${y}" class="bg-transparent focus:outline-none w-full text-sm text-indigo-300 font-semibold text-center select-all" />
+        <input type="number" min="0" max="100" value="${y}" class="bg-transparent focus:outline-none w-full text-sm text-indigo-300 font-semibold text-center select-all appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]" />
       </div>
     </div>
     ${allowDelete && points.length > 3 ? `
@@ -638,6 +672,92 @@ function createCoordinateRow(idx, x, y, changeCallback, allowDelete) {
     const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
     changeCallback('y', val);
   });
+
+  // Pointer/Mouse/Touch-based Drag and Drop implementation
+  if (isCustomStar) {
+    const grip = row.querySelector('.drag-grip');
+    if (grip) {
+      const startDrag = (e) => {
+        e.preventDefault(); // Prevent text selection/scrolling
+
+        row.classList.add('bg-indigo-950/40', 'border-indigo-500', 'border', 'z-50', 'relative');
+
+        const listContainer = document.getElementById('points-list');
+        const rows = Array.from(listContainer.querySelectorAll('.input-row'));
+        const rowRects = rows.map(r => r.getBoundingClientRect());
+        const initialIndex = idx;
+        let currentIndex = idx;
+
+        const onDragMove = (moveEvent) => {
+          const clientY = moveEvent.clientY || (moveEvent.touches && moveEvent.touches[0] && moveEvent.touches[0].clientY);
+          if (clientY === undefined) return;
+
+          let targetIndex = currentIndex;
+          if (rowRects.length > 0) {
+            if (clientY < rowRects[0].top) {
+              targetIndex = 0;
+            } else if (clientY > rowRects[rowRects.length - 1].bottom) {
+              targetIndex = rowRects.length - 1;
+            } else {
+              for (let i = 0; i < rowRects.length; i++) {
+                const rect = rowRects[i];
+                if (clientY >= rect.top && clientY <= rect.bottom) {
+                  targetIndex = i;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (targetIndex !== currentIndex) {
+            currentIndex = targetIndex;
+
+            // Visual feedback: highlight target position
+            rows.forEach((r, i) => {
+              if (i === currentIndex && i !== initialIndex) {
+                r.classList.add('border-indigo-500', 'border', 'bg-indigo-950/20');
+              } else if (i !== initialIndex) {
+                r.classList.remove('border-indigo-500', 'border', 'bg-indigo-950/20');
+              }
+            });
+          }
+
+          // Offset the dragged row vertically
+          const initialRect = rowRects[initialIndex];
+          if (initialRect) {
+            const offset = clientY - (initialRect.top + initialRect.height / 2);
+            row.style.transform = `translateY(${offset}px)`;
+          }
+        };
+
+        const onDragEnd = () => {
+          window.removeEventListener('mousemove', onDragMove);
+          window.removeEventListener('mouseup', onDragEnd);
+          window.removeEventListener('touchmove', onDragMove);
+          window.removeEventListener('touchend', onDragEnd);
+
+          row.style.transform = '';
+          row.classList.remove('bg-indigo-950/40', 'border-indigo-500', 'border', 'z-50', 'relative');
+
+          rows.forEach(r => r.classList.remove('border-indigo-500', 'border', 'bg-indigo-950/20'));
+
+          if (currentIndex !== initialIndex) {
+            const draggedPoint = points.splice(initialIndex, 1)[0];
+            points.splice(currentIndex, 0, draggedPoint);
+            updateCanvas();
+          }
+        };
+
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+        window.addEventListener('touchmove', onDragMove, { passive: true });
+        window.addEventListener('touchend', onDragEnd);
+      };
+
+      grip.addEventListener('mousedown', startDrag);
+      grip.addEventListener('touchstart', startDrag, { passive: false });
+    }
+  }
 
   return row;
 }
