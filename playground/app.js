@@ -1390,3 +1390,31 @@ window.copyToClipboard = copyToClipboard;
 window.addPoint = addPoint;
 window.changeBgImage = changeBgImage;
 window.loadExtractorUrl = loadExtractorUrl;
+
+// ============================================================
+// Visitor Counter
+// Persists a unique-per-day visit count via localStorage
+// ============================================================
+(function () {
+  const KEY       = 'tcp_visitors_v1';
+  const TODAY_KEY = 'tcp_visitors_today';
+  const today     = new Date().toDateString();
+
+  let count = parseInt(localStorage.getItem(KEY) || '0', 10);
+  const lastVisit = localStorage.getItem(TODAY_KEY);
+
+  // Increment only once per calendar day per browser
+  if (lastVisit !== today) {
+    count += 1;
+    localStorage.setItem(KEY, count);
+    localStorage.setItem(TODAY_KEY, today);
+  }
+
+  const display = document.getElementById('vc-count-display');
+  if (display) {
+    display.textContent = count >= 1000
+      ? (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+      : count;
+    display.classList.add('vc-count-animate');
+  }
+})();
