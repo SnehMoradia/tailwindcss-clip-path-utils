@@ -66,6 +66,22 @@ function scanWorkspaceForClipPaths() {
 
 const toObject = (arr) => Object.fromEntries(arr.map(v => [v, v]));
 
+const safeThemeValues = (themeFn, key) => {
+  try {
+    const val = themeFn(key);
+    if (!val || typeof val !== 'object') return {};
+    const res = {};
+    for (const k of Object.keys(val)) {
+      if (!k.startsWith('__')) {
+        res[k] = val[k];
+      }
+    }
+    return res;
+  } catch (e) {
+    return {};
+  }
+};
+
 module.exports = ({ matchUtilities, theme }) => {
   console.log("✅ Clip Path Plugin Loaded");
   const scanned = scanWorkspaceForClipPaths();
@@ -90,7 +106,7 @@ module.exports = ({ matchUtilities, theme }) => {
     {
       values: {
         ...toObject(scanned.cir),
-        ...theme("clipPathCir"),
+        ...safeThemeValues(theme, "clipPathCir"),
         ...Object.fromEntries(Array.from({ length: 101 }, (_, i) => [i, i])),
         "40-at-50-50": "40-at-50-50",
         "50-at-50-50": "50-at-50-50",
@@ -124,7 +140,7 @@ module.exports = ({ matchUtilities, theme }) => {
     {
       values: {
         ...toObject(scanned.eli),
-        ...theme("clipPathEli"),
+        ...safeThemeValues(theme, "clipPathEli"),
         "25_40": "25_40",
         "25-40": "25-40",
         "40_40": "40_40",
@@ -157,7 +173,7 @@ module.exports = ({ matchUtilities, theme }) => {
     {
       values: {
         ...toObject(scanned.ins),
-        ...theme("clipPathIns"),
+        ...safeThemeValues(theme, "clipPathIns"),
         "5_20_15_10": "5_20_15_10",
         "5-20-15-10": "5-20-15-10",
         "10_10_10_10": "10_10_10_10",
@@ -191,7 +207,7 @@ module.exports = ({ matchUtilities, theme }) => {
     {
       values: {
         ...toObject(scanned.pol),
-        ...theme("clipPathPol"),
+        ...safeThemeValues(theme, "clipPathPol"),
         "50-0-100-100-0-100": "50-0-100-100-0-100",
         "20-0-80-0-100-100-0-100": "20-0-80-0-100-100-0-100",
         "25-0-100-0-75-100-0-100": "25-0-100-0-75-100-0-100",
@@ -229,7 +245,7 @@ module.exports = ({ matchUtilities, theme }) => {
     {
       values: {
         ...toObject(scanned.rnd),
-        ...theme("clipPathRnd"),
+        ...safeThemeValues(theme, "clipPathRnd"),
         "5-5-5-5-20-20-20-20":    "5-5-5-5-20-20-20-20",
         "10-5-10-5-50-50-50-50":  "10-5-10-5-50-50-50-50",
         "5-5-5-5-40-40-0-0":      "5-5-5-5-40-40-0-0",
