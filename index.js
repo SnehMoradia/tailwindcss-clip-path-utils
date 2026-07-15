@@ -128,4 +128,39 @@ module.exports = ({ matchUtilities }) => {
       type: "any",
     }
   );
+
+  // Rounded (inset with per-corner border-radius)
+  matchUtilities(
+    {
+      "clip-path-rnd": (value) => {
+        const valStr = String(value);
+        // Expect format: t-r-b-l-r1-r2-r3-r4 (all in %)
+        const parts = valStr.split(/[-_]/);
+        if (parts.length >= 8) {
+          const [t, r, b, l, r1, r2, r3, r4] = parts;
+          return {
+            clipPath: `inset(${t}% ${r}% ${b}% ${l}% round ${r1}% ${r2}% ${r3}% ${r4}%)`,
+          };
+        }
+        if (parts.length === 4) {
+          const [t, r, b, l] = parts;
+          return { clipPath: `inset(${t}% ${r}% ${b}% ${l}%)` };
+        }
+        return { clipPath: `inset(${valStr})` };
+      },
+    },
+    {
+      values: {
+        "5-5-5-5-20-20-20-20":    "5-5-5-5-20-20-20-20",
+        "10-5-10-5-50-50-50-50":  "10-5-10-5-50-50-50-50",
+        "5-5-5-5-40-40-0-0":      "5-5-5-5-40-40-0-0",
+        "5-5-5-5-0-0-40-40":      "5-5-5-5-0-0-40-40",
+        "5-5-5-5-40-0-0-40":      "5-5-5-5-40-0-0-40",
+        "8-8-8-8-30-30-30-30":    "8-8-8-8-30-30-30-30",
+        "5-5-5-5-40-10-40-10":    "5-5-5-5-40-10-40-10",
+        "15-10-15-10-50-10-50-10": "15-10-15-10-50-10-50-10",
+      },
+      type: "any",
+    }
+  );
 };

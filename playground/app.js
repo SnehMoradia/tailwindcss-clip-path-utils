@@ -31,6 +31,17 @@ const insetPresets = {
   "Slender Sides": { t: 5, r: 20, b: 15, l: 10 }
 };
 
+const roundedPresets = {
+  "Rounded Card":    { t: 5, r: 5, b: 5, l: 5, r1: 20, r2: 20, r3: 20, r4: 20 },
+  "Pill":            { t: 10, r: 5, b: 10, l: 5, r1: 50, r2: 50, r3: 50, r4: 50 },
+  "Top Rounded":     { t: 5, r: 5, b: 5, l: 5, r1: 40, r2: 40, r3: 0,  r4: 0  },
+  "Bottom Rounded":  { t: 5, r: 5, b: 5, l: 5, r1: 0,  r2: 0,  r3: 40, r4: 40 },
+  "Left Rounded":    { t: 5, r: 5, b: 5, l: 5, r1: 40, r2: 0,  r3: 0,  r4: 40 },
+  "Squircle":        { t: 8, r: 8, b: 8, l: 8, r1: 30, r2: 30, r3: 30, r4: 30 },
+  "Asymmetric":      { t: 5, r: 5, b: 5, l: 5, r1: 40, r2: 10, r3: 40, r4: 10 },
+  "Wave Badge":      { t: 15, r: 10, b: 15, l: 10, r1: 50, r2: 10, r3: 50, r4: 10 }
+};
+
 // State Variables
 let mode = 'polygon';
 let theme = 'dark';
@@ -38,6 +49,7 @@ let points = []; // Array of {x, y} coordinates (polygon)
 let circleState = { r: 40, cx: 50, cy: 50 }; // Circle properties
 let ellipseState = { rx: 40, ry: 40, cx: 50, cy: 50 }; // Ellipse properties
 let insetState = { t: 10, r: 10, b: 10, l: 10 }; // Inset properties
+let roundedState = { t: 5, r: 5, b: 5, l: 5, r1: 20, r2: 20, r3: 20, r4: 20 }; // Rounded inset with corner radii
 
 // Core Elements
 const canvasWrapper = document.getElementById('canvas-wrapper');
@@ -114,7 +126,7 @@ function setShapeMode(newMode, keepPoints = false) {
   mode = newMode;
   
   // Update Tab CSS
-  ['polygon', 'circle', 'ellipse', 'inset'].forEach(m => {
+  ['polygon', 'circle', 'ellipse', 'inset', 'rounded'].forEach(m => {
     const btn = document.getElementById(`tab-${m}`);
     if (m === mode) {
       btn.className = "flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
@@ -158,6 +170,11 @@ function setShapeMode(newMode, keepPoints = false) {
     btnAddPoint.classList.add('hidden');
     pointsTitle.textContent = "Inset Config";
     loadPresetInset(Object.keys(insetPresets)[0]);
+  } else if (mode === 'rounded') {
+    svgInset.classList.remove('hidden');
+    btnAddPoint.classList.add('hidden');
+    pointsTitle.textContent = "Rounded Config";
+    loadPresetRounded(Object.keys(roundedPresets)[0]);
   }
 
   updatePresetsGrid();
@@ -183,6 +200,9 @@ function updatePresetsGrid() {
   } else if (mode === 'inset') {
     list = insetPresets;
     action = loadPresetInset;
+  } else if (mode === 'rounded') {
+    list = roundedPresets;
+    action = loadPresetRounded;
   }
 
   Object.keys(list).forEach(name => {
@@ -211,6 +231,10 @@ function loadPresetInset(name) {
   insetState = { ...insetPresets[name] };
   updateCanvas();
 }
+function loadPresetRounded(name) {
+  roundedState = { ...roundedPresets[name] };
+  updateCanvas();
+}
 
 // Canvas Update Engine
 function updateCanvas() {
@@ -225,6 +249,8 @@ function updateCanvas() {
     renderEllipse();
   } else if (mode === 'inset') {
     renderInset();
+  } else if (mode === 'rounded') {
+    renderRounded();
   }
 }
 
@@ -256,18 +282,7 @@ function renderPolygon() {
 
   // 4. Update code blocks
   const classCoords = points.map(p => `${p.x}-${p.y}`).join('-');
-  const predefinedPolygons = [
-    "50-0-100-100-0-100",
-    "20-0-80-0-100-100-0-100",
-    "25-0-100-0-75-100-0-100",
-    "50-0-100-38-82-100-18-100-0-38",
-    "50-0-100-25-100-75-50-100-0-75-0-25",
-    "50-0-61-35-98-35-68-57-79-91-50-70-21-91-32-57-2-35-39-35",
-    "0-30-60-30-60-0-100-50-60-100-60-70-0-70",
-    "35-0-65-0-65-35-100-35-100-65-65-65-65-100-35-100-35-65-0-65-0-35-35-35",
-    "20-0-0-20-30-50-0-80-20-100-50-70-80-100-100-80-70-50-100-20-80-0-50-30"
-  ];
-  let tailwindClass = `clip-path-pol-${classCoords}`;
+  const tailwindClass = `clip-path-pol-${classCoords}`;
   
   codeTailwind.textContent = tailwindClass;
   codeCss.textContent = `clip-path: ${clipPathValue};`;
@@ -467,7 +482,74 @@ function renderInset() {
   codeCss.textContent = `clip-path: ${clipPathValue};`;
 }
 
-// Helper: Create HTML handle node
+// ROUNDED RENDERER
+function renderRounded() {
+  const topPx    = (roundedState.t * 384) / 100;
+  const leftPx   = (roundedState.l * 384) / 100;
+  const widthPx  = 384 - ((roundedState.l + roundedState.r) * 384) / 100;
+  const heightPx = 384 - ((roundedState.t + roundedState.b) * 384) / 100;
+
+  // 1. Set SVG inset rect guides (reuse svg-inset)
+  svgInset.setAttribute('x', leftPx);
+  svgInset.setAttribute('y', topPx);
+  svgInset.setAttribute('width', Math.max(0, widthPx));
+  svgInset.setAttribute('height', Math.max(0, heightPx));
+  const minDim = Math.min(Math.max(0, widthPx), Math.max(0, heightPx));
+  const radPx = Math.round((Math.min(roundedState.r1, roundedState.r2, roundedState.r3, roundedState.r4) / 100) * (minDim / 2));
+  svgInset.setAttribute('rx', radPx);
+  svgInset.setAttribute('ry', radPx);
+
+  // 2. Set CSS clip-path
+  const clipPathValue = `inset(${roundedState.t}% ${roundedState.r}% ${roundedState.b}% ${roundedState.l}% round ${roundedState.r1}% ${roundedState.r2}% ${roundedState.r3}% ${roundedState.r4}%)`;
+  clippedElement.style.clipPath = clipPathValue;
+
+  // 3. Drag handles for inset edges
+  const topHandle = createHandle(50, roundedState.t, 'T', (nx, ny) => {
+    roundedState.t = Math.max(0, Math.min(100 - roundedState.b, ny));
+    updateCanvas();
+  });
+  const rightHandle = createHandle(100 - roundedState.r, 50, 'R', (nx, ny) => {
+    roundedState.r = Math.max(0, Math.min(100 - roundedState.l, 100 - nx));
+    updateCanvas();
+  });
+  const bottomHandle = createHandle(50, 100 - roundedState.b, 'B', (nx, ny) => {
+    roundedState.b = Math.max(0, Math.min(100 - roundedState.t, 100 - ny));
+    updateCanvas();
+  });
+  const leftHandle = createHandle(roundedState.l, 50, 'L', (nx, ny) => {
+    roundedState.l = Math.max(0, Math.min(100 - roundedState.r, nx));
+    updateCanvas();
+  });
+  handlesContainer.appendChild(topHandle);
+  handlesContainer.appendChild(rightHandle);
+  handlesContainer.appendChild(bottomHandle);
+  handlesContainer.appendChild(leftHandle);
+
+  // 4. Sliders: inset + per-corner radius
+  pointsList.appendChild(createSliderRow("Top (t)", roundedState.t, 0, 100 - roundedState.b, (val) => { roundedState.t = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Right (r)", roundedState.r, 0, 100 - roundedState.l, (val) => { roundedState.r = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Bottom (b)", roundedState.b, 0, 100 - roundedState.t, (val) => { roundedState.b = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Left (l)", roundedState.l, 0, 100 - roundedState.r, (val) => { roundedState.l = val; updateCanvas(); }));
+
+  // Separator label
+  const sep = document.createElement('div');
+  sep.className = 'text-[10px] text-body-secondary uppercase tracking-widest pt-1 pb-0.5 font-semibold';
+  sep.textContent = 'Corner Radius';
+  pointsList.appendChild(sep);
+
+  pointsList.appendChild(createSliderRow("Top-Left",     roundedState.r1, 0, 100, (val) => { roundedState.r1 = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Top-Right",    roundedState.r2, 0, 100, (val) => { roundedState.r2 = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Bottom-Right", roundedState.r3, 0, 100, (val) => { roundedState.r3 = val; updateCanvas(); }));
+  pointsList.appendChild(createSliderRow("Bottom-Left",  roundedState.r4, 0, 100, (val) => { roundedState.r4 = val; updateCanvas(); }));
+
+  // 5. Output code
+  const classVal = `${roundedState.t}-${roundedState.r}-${roundedState.b}-${roundedState.l}-${roundedState.r1}-${roundedState.r2}-${roundedState.r3}-${roundedState.r4}`;
+  const tailwindClass = `clip-path-rnd-${classVal}`;
+  codeTailwind.textContent = tailwindClass;
+  codeCss.textContent = `clip-path: ${clipPathValue};`;
+}
+
+
 function createHandle(x, y, label, dragCallback) {
   const handle = document.createElement('div');
   handle.className = "absolute w-6 h-6 -ml-3 -mt-3 rounded-full border-2 border-white shadow-lg cursor-grab active:cursor-grabbing z-10 flex items-center justify-center text-[10px] text-white font-bold select-none transition-transform duration-100 hover:scale-110 active:scale-95 touch-none";
@@ -717,6 +799,8 @@ detectionModeSelect.addEventListener('change', (e) => {
 
 let customCentroid = null;
 let draggingExtractorPointIndex = -1; // -1 = none, -2 = centroid, >=0 = node index
+let detectedShapeType = 'polygon'; // 'circle' | 'ellipse' | 'polygon'
+let detectedShapeParams = {};     // Stores r/rx/ry/cx/cy for preview overlay
 
 function loadExtractorImage(file) {
   customCentroid = null;
@@ -892,12 +976,54 @@ function processExtractedImage() {
     });
   }
   
-  // Auto-sync extracted points with main editor in real time!
-  points = JSON.parse(JSON.stringify(extractedPoints));
-  setShapeMode('polygon', true);
-  updateCanvas();
-  
-  drawPreviewCanvas(cx, cy);
+  // ── Smart Shape Auto-Detection ──────────────────────────────────────────
+  // Compute raw pixel distances from centroid for each detected point
+  const rawDists = extractedPoints.map(p => {
+    const dx = (p.x / 100) * w - cx;
+    const dy = (p.y / 100) * h - cy;
+    return Math.sqrt(dx * dx + dy * dy);
+  });
+
+  const meanDist  = rawDists.reduce((s, d) => s + d, 0) / rawDists.length;
+  const variance  = rawDists.reduce((s, d) => s + (d - meanDist) ** 2, 0) / rawDists.length;
+  const stdDev    = Math.sqrt(variance);
+  const cv        = meanDist > 0 ? stdDev / meanDist : 1; // Coefficient of Variation
+
+  // Compute bounding-box axes from min/max X and Y of extracted points
+  const xs = extractedPoints.map(p => p.x);
+  const ys = extractedPoints.map(p => p.y);
+  const bboxW = Math.max(...xs) - Math.min(...xs);
+  const bboxH = Math.max(...ys) - Math.min(...ys);
+  const rxEst = Math.round(bboxW / 2);
+  const ryEst = Math.round(bboxH / 2);
+  const cxEst = Math.round((Math.min(...xs) + Math.max(...xs)) / 2);
+  const cyEst = Math.round((Math.min(...ys) + Math.max(...ys)) / 2);
+  const axisRatio = rxEst > 0 && ryEst > 0 ? Math.max(rxEst, ryEst) / Math.min(rxEst, ryEst) : 1;
+
+  if (cv < 0.15) {
+    // ── CIRCLE detected ──────────────────────────────────────────────────
+    const rEst = Math.round(meanDist / w * 100);
+    circleState = { r: rEst, cx: cxEst, cy: cyEst };
+    detectedShapeType = 'circle';
+    detectedShapeParams = { r: rEst, cx: cxEst, cy: cyEst };
+    setShapeMode('circle');
+    drawPreviewCanvas(cx, cy);
+  } else if (cv < 0.30 && axisRatio > 1.10) {
+    // ── ELLIPSE detected ─────────────────────────────────────────────────
+    ellipseState = { rx: rxEst, ry: ryEst, cx: cxEst, cy: cyEst };
+    detectedShapeType = 'ellipse';
+    detectedShapeParams = { rx: rxEst, ry: ryEst, cx: cxEst, cy: cyEst };
+    setShapeMode('ellipse');
+    drawPreviewCanvas(cx, cy);
+  } else {
+    // ── POLYGON (default) ────────────────────────────────────────────────
+    detectedShapeType = 'polygon';
+    detectedShapeParams = {};
+    points = JSON.parse(JSON.stringify(extractedPoints));
+    setShapeMode('polygon', true);
+    updateCanvas();
+    drawPreviewCanvas(cx, cy);
+  }
 }
 
 function drawPreviewCanvas(cx, cy) {
@@ -907,12 +1033,74 @@ function drawPreviewCanvas(cx, cy) {
   // Clear preview
   previewCtx.clearRect(0, 0, w, h);
   
-  // Draw binarized/translucent view of original image for contrast
+  // Draw faded image behind the overlay
   previewCtx.globalAlpha = 0.45;
   previewCtx.drawImage(originalExtractorImage, 0, 0, w, h);
   previewCtx.globalAlpha = 1.0;
-  
-  // Draw detected centroid (larger green dot with border)
+
+  // Draw shape-specific overlay
+  previewCtx.strokeStyle = '#6366f1';
+  previewCtx.lineWidth = 2;
+
+  if (detectedShapeType === 'circle') {
+    // Draw circle arc + fill
+    const rPx = (detectedShapeParams.r / 100) * w;
+    const cxPx = (detectedShapeParams.cx / 100) * w;
+    const cyPx = (detectedShapeParams.cy / 100) * h;
+    previewCtx.fillStyle = 'rgba(99,102,241,0.15)';
+    previewCtx.beginPath();
+    previewCtx.arc(cxPx, cyPx, rPx, 0, 2 * Math.PI);
+    previewCtx.fill();
+    previewCtx.stroke();
+    // Label badge
+    previewCtx.fillStyle = '#6366f1';
+    previewCtx.font = 'bold 11px Outfit, sans-serif';
+    previewCtx.textAlign = 'center';
+    previewCtx.fillText('⬤ Circle detected', cxPx, cyPx - rPx - 8);
+  } else if (detectedShapeType === 'ellipse') {
+    // Draw ellipse arc + fill
+    const rxPx = (detectedShapeParams.rx / 100) * w;
+    const ryPx = (detectedShapeParams.ry / 100) * h;
+    const cxPx = (detectedShapeParams.cx / 100) * w;
+    const cyPx = (detectedShapeParams.cy / 100) * h;
+    previewCtx.fillStyle = 'rgba(99,102,241,0.15)';
+    previewCtx.beginPath();
+    previewCtx.ellipse(cxPx, cyPx, rxPx, ryPx, 0, 0, 2 * Math.PI);
+    previewCtx.fill();
+    previewCtx.stroke();
+    // Label badge
+    previewCtx.fillStyle = '#a78bfa';
+    previewCtx.font = 'bold 11px Outfit, sans-serif';
+    previewCtx.textAlign = 'center';
+    previewCtx.fillText('⬤ Ellipse detected', cxPx, cyPx - ryPx - 8);
+  } else {
+    // Polygon: draw contour + nodes as before
+    previewCtx.fillStyle = 'rgba(99,102,241,0.15)';
+    previewCtx.beginPath();
+    extractedPoints.forEach((p, idx) => {
+      const px = (p.x * w) / 100;
+      const py = (p.y * h) / 100;
+      if (idx === 0) previewCtx.moveTo(px, py);
+      else previewCtx.lineTo(px, py);
+    });
+    previewCtx.closePath();
+    previewCtx.fill();
+    previewCtx.stroke();
+    // Draw nodes
+    extractedPoints.forEach((p) => {
+      const px = (p.x * w) / 100;
+      const py = (p.y * h) / 100;
+      previewCtx.fillStyle = '#6366f1';
+      previewCtx.strokeStyle = '#ffffff';
+      previewCtx.lineWidth = 1.5;
+      previewCtx.beginPath();
+      previewCtx.arc(px, py, 5.5, 0, 2 * Math.PI);
+      previewCtx.fill();
+      previewCtx.stroke();
+    });
+  }
+
+  // Always draw centroid dot
   previewCtx.fillStyle = '#10b981';
   previewCtx.strokeStyle = '#ffffff';
   previewCtx.lineWidth = 1.5;
@@ -920,32 +1108,6 @@ function drawPreviewCanvas(cx, cy) {
   previewCtx.arc(cx, cy, 6, 0, 2 * Math.PI);
   previewCtx.fill();
   previewCtx.stroke();
-  
-  // Draw outer contour line
-  previewCtx.strokeStyle = '#6366f1';
-  previewCtx.lineWidth = 1.5;
-  previewCtx.beginPath();
-  extractedPoints.forEach((p, idx) => {
-    const px = (p.x * w) / 100;
-    const py = (p.y * h) / 100;
-    if (idx === 0) previewCtx.moveTo(px, py);
-    else previewCtx.lineTo(px, py);
-  });
-  previewCtx.closePath();
-  previewCtx.stroke();
-  
-  // Draw nodes (slightly larger blue dots for dragging)
-  extractedPoints.forEach((p, idx) => {
-    const px = (p.x * w) / 100;
-    const py = (p.y * h) / 100;
-    previewCtx.fillStyle = '#6366f1';
-    previewCtx.strokeStyle = '#ffffff';
-    previewCtx.lineWidth = 1.5;
-    previewCtx.beginPath();
-    previewCtx.arc(px, py, 5.5, 0, 2 * Math.PI);
-    previewCtx.fill();
-    previewCtx.stroke();
-  });
 }
 
 // Drag and drop for preview canvas points
@@ -1053,17 +1215,7 @@ const stopDragging = (e) => {
 previewCanvas.addEventListener('pointerup', stopDragging);
 previewCanvas.addEventListener('pointercancel', stopDragging);
 
-function applyExtractedShape() {
-  if (extractedPoints.length < 3) return;
-  
-  // Set shape mode to polygon
-  points = JSON.parse(JSON.stringify(extractedPoints));
-  setShapeMode('polygon');
-  updateCanvas();
-  
-  // Scroll to canvas
-  canvasWrapper.scrollIntoView({ behavior: 'smooth' });
-}
+
 
 // Sidebar Tabs Controller
 let activeSidebarTab = 'editor';
@@ -1112,4 +1264,3 @@ window.copyToClipboard = copyToClipboard;
 window.addPoint = addPoint;
 window.changeBgImage = changeBgImage;
 window.loadExtractorUrl = loadExtractorUrl;
-window.applyExtractedShape = applyExtractedShape;
