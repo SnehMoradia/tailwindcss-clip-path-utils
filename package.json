@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "node server.js",
-    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css",
-    "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch"
+    "build": "npx @tailwindcss/cli -i ./playground/input.css -o ./playground/output.css",
+    "watch": "npx @tailwindcss/cli -i ./playground/input.css -o ./playground/output.css --watch"
   },
   "keywords": [
     "tailwindcss",
