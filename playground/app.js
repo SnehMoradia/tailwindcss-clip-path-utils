@@ -435,19 +435,22 @@ function renderInset() {
   clippedElement.style.clipPath = clipPathValue;
 
   // 3. Render border/guide handles (Drag T, R, B, L)
-  const topHandle = createHandle(50, insetState.t, 'T', (newX, newY) => {
+  const centerX = (100 - insetState.r + insetState.l) / 2;
+  const centerY = (100 - insetState.b + insetState.t) / 2;
+
+  const topHandle = createHandle(centerX, insetState.t, 'T', (newX, newY) => {
     insetState.t = Math.max(0, Math.min(100 - insetState.b, newY));
     updateCanvas();
   });
-  const rightHandle = createHandle(100 - insetState.r, 50, 'R', (newX, newY) => {
+  const rightHandle = createHandle(100 - insetState.r, centerY, 'R', (newX, newY) => {
     insetState.r = Math.max(0, Math.min(100 - insetState.l, 100 - newX));
     updateCanvas();
   });
-  const bottomHandle = createHandle(50, 100 - insetState.b, 'B', (newX, newY) => {
+  const bottomHandle = createHandle(centerX, 100 - insetState.b, 'B', (newX, newY) => {
     insetState.b = Math.max(0, Math.min(100 - insetState.t, 100 - newY));
     updateCanvas();
   });
-  const leftHandle = createHandle(insetState.l, 50, 'L', (newX, newY) => {
+  const leftHandle = createHandle(insetState.l, centerY, 'L', (newX, newY) => {
     insetState.l = Math.max(0, Math.min(100 - insetState.r, newX));
     updateCanvas();
   });
@@ -504,19 +507,22 @@ function renderRounded() {
   clippedElement.style.clipPath = clipPathValue;
 
   // 3. Drag handles for inset edges
-  const topHandle = createHandle(50, roundedState.t, 'T', (nx, ny) => {
+  const centerX = (100 - roundedState.r + roundedState.l) / 2;
+  const centerY = (100 - roundedState.b + roundedState.t) / 2;
+
+  const topHandle = createHandle(centerX, roundedState.t, 'T', (nx, ny) => {
     roundedState.t = Math.max(0, Math.min(100 - roundedState.b, ny));
     updateCanvas();
   });
-  const rightHandle = createHandle(100 - roundedState.r, 50, 'R', (nx, ny) => {
+  const rightHandle = createHandle(100 - roundedState.r, centerY, 'R', (nx, ny) => {
     roundedState.r = Math.max(0, Math.min(100 - roundedState.l, 100 - nx));
     updateCanvas();
   });
-  const bottomHandle = createHandle(50, 100 - roundedState.b, 'B', (nx, ny) => {
+  const bottomHandle = createHandle(centerX, 100 - roundedState.b, 'B', (nx, ny) => {
     roundedState.b = Math.max(0, Math.min(100 - roundedState.t, 100 - ny));
     updateCanvas();
   });
-  const leftHandle = createHandle(roundedState.l, 50, 'L', (nx, ny) => {
+  const leftHandle = createHandle(roundedState.l, centerY, 'L', (nx, ny) => {
     roundedState.l = Math.max(0, Math.min(100 - roundedState.r, nx));
     updateCanvas();
   });

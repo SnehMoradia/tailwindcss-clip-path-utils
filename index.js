@@ -1,5 +1,74 @@
-module.exports = ({ matchUtilities }) => {
+const fs = require('fs');
+const path = require('path');
+
+function scanWorkspaceForClipPaths() {
+  const results = { cir: [], eli: [], ins: [], pol: [], rnd: [] };
+  
+  function scan(dir) {
+    try {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const fullPath = path.join(dir, file);
+        let stat;
+        try {
+          stat = fs.statSync(fullPath);
+        } catch (e) {
+          continue;
+        }
+        if (stat.isDirectory()) {
+          if (file !== 'node_modules' && file !== '.git' && file !== '.vscode' && file !== '.idea' && file !== 'dist' && file !== 'build') {
+            scan(fullPath);
+          }
+        } else {
+          const ext = path.extname(file);
+          if (['.html', '.js', '.jsx', '.ts', '.tsx', '.vue', '.svelte'].includes(ext)) {
+            let content;
+            try {
+              content = fs.readFileSync(fullPath, 'utf8');
+            } catch (e) {
+              continue;
+            }
+            
+            // Regexes for bracketless class names
+            const cirRegex = /\bclip-path-cir-([0-9_at-]+)\b/g;
+            const eliRegex = /\bclip-path-eli-([0-9_at-]+)\b/g;
+            const insRegex = /\bclip-path-ins-([0-9_-]+)\b/g;
+            const polRegex = /\bclip-path-pol-([0-9_-]+)\b/g;
+            const rndRegex = /\bclip-path-rnd-([0-9_-]+)\b/g;
+            
+            let match;
+            while ((match = cirRegex.exec(content)) !== null) {
+              results.cir.push(match[1]);
+            }
+            while ((match = eliRegex.exec(content)) !== null) {
+              results.eli.push(match[1]);
+            }
+            while ((match = insRegex.exec(content)) !== null) {
+              results.ins.push(match[1]);
+            }
+            while ((match = polRegex.exec(content)) !== null) {
+              results.pol.push(match[1]);
+            }
+            while ((match = rndRegex.exec(content)) !== null) {
+              results.rnd.push(match[1]);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore directory-level errors
+    }
+  }
+
+  scan(process.cwd());
+  return results;
+}
+
+const toObject = (arr) => Object.fromEntries(arr.map(v => [v, v]));
+
+module.exports = ({ matchUtilities, theme }) => {
   console.log("✅ Clip Path Plugin Loaded");
+  const scanned = scanWorkspaceForClipPaths();
   
   // Circle
   matchUtilities(
@@ -20,6 +89,8 @@ module.exports = ({ matchUtilities }) => {
     },
     {
       values: {
+        ...toObject(scanned.cir),
+        ...theme("clipPathCir"),
         ...Object.fromEntries(Array.from({ length: 101 }, (_, i) => [i, i])),
         "40-at-50-50": "40-at-50-50",
         "50-at-50-50": "50-at-50-50",
@@ -52,6 +123,8 @@ module.exports = ({ matchUtilities }) => {
     },
     {
       values: {
+        ...toObject(scanned.eli),
+        ...theme("clipPathEli"),
         "25_40": "25_40",
         "25-40": "25-40",
         "40_40": "40_40",
@@ -83,6 +156,8 @@ module.exports = ({ matchUtilities }) => {
     },
     {
       values: {
+        ...toObject(scanned.ins),
+        ...theme("clipPathIns"),
         "5_20_15_10": "5_20_15_10",
         "5-20-15-10": "5-20-15-10",
         "10_10_10_10": "10_10_10_10",
@@ -115,6 +190,8 @@ module.exports = ({ matchUtilities }) => {
     },
     {
       values: {
+        ...toObject(scanned.pol),
+        ...theme("clipPathPol"),
         "50-0-100-100-0-100": "50-0-100-100-0-100",
         "20-0-80-0-100-100-0-100": "20-0-80-0-100-100-0-100",
         "25-0-100-0-75-100-0-100": "25-0-100-0-75-100-0-100",
@@ -151,6 +228,8 @@ module.exports = ({ matchUtilities }) => {
     },
     {
       values: {
+        ...toObject(scanned.rnd),
+        ...theme("clipPathRnd"),
         "5-5-5-5-20-20-20-20":    "5-5-5-5-20-20-20-20",
         "10-5-10-5-50-50-50-50":  "10-5-10-5-50-50-50-50",
         "5-5-5-5-40-40-0-0":      "5-5-5-5-40-40-0-0",
@@ -159,6 +238,7 @@ module.exports = ({ matchUtilities }) => {
         "8-8-8-8-30-30-30-30":    "8-8-8-8-30-30-30-30",
         "5-5-5-5-40-10-40-10":    "5-5-5-5-40-10-40-10",
         "15-10-15-10-50-10-50-10": "15-10-15-10-50-10-50-10",
+        "5-0-5-5-15-0-18-0":       "5-0-5-5-15-0-18-0",
       },
       type: "any",
     }
